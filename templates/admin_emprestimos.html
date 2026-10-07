@@ -1,0 +1,41 @@
+{% extends "base.html" %} 
+
+{% block title %}Controle de Empréstimos{% endblock %}
+
+{% block content %}
+    <h2>Equipamentos Emprestados</h2>
+
+    {% if emprestimos %}
+        <table class="tabela-admin">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Aluno</th>
+                    <th>Equipamento</th>
+                    <th>Data Empréstimo</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in emprestimos %}
+                <tr>
+                    <td>{{ e['id'] }}</td>
+                    <td>{{ e['nome_aluno'] }}</td>
+                    <td>{{ e['equipamento'] }}</td>
+                    <td>{{ e['data_inicio'] }}</td>
+                    <td>
+                        <a href="{{ url_for('finalizar_emprestimo_admin', id=e['id']) }}" class="btn-recusar">
+                            Finalizar / Devolver
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert">
+            <p>Nenhum equipamento emprestado no momento.</p>
+        </div>
+    {% endif %}
+
+{% endblock %}

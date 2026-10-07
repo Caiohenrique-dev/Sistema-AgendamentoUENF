@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Selecionar Encarregado{% endblock %}
+{% block content %}
+
+<h2>Qual encarregado você é?</h2>
+
+<form method="POST">
+    <select name="encarregado_id" required>
+        <option value="">-- Selecione --</option>
+        {% for e in encarregados %}
+            <option value="{{ e.id }}">{{ e.nome }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Entrar</button>
+</form>
+
+{% endblock %}

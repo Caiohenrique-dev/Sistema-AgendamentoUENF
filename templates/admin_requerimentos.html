@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Requerimentos{% endblock %}
+
+{% block content %}
+<h2>Requerimentos Pendentes</h2>
+
+{% if pedidos %}
+    <table class="tabela-admin">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Aluno</th>
+                <th>E-mail</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pedido in pedidos %}
+            <tr>
+                <td>{{ pedido.id }}</td>
+                <td>{{ pedido.solicitante }}</td>
+                <td>{{ pedido.email_usuario }}</td>
+                <td>{{ pedido.status }}</td>
+                <td>
+                    <a class="btn-aprovar" href="{{ url_for('pedido_aprovar', id=pedido.id) }}">
+                        Aprovar
+                    </a>
+                    
+                    <a class="btn-recusar" href="{{ url_for('pedido_recusar', id=pedido.id) }}">
+                        Recusar
+                    </a>
+                    
+                    <a href="{{ url_for('visualizar_requerimento', id=pedido.id) }}">
+                        Visualizar
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="alert">
+        <p>Não há requerimentos pendentes para análise no momento.</p>
+    </div>
+{% endif %}
+
+{% endblock %}

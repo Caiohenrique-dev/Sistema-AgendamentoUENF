@@ -1,0 +1,569 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+    <h2>Meus Pedidos</h2>
+
+    <div class="novo-pedido-acao">
+        <a href="{{ url_for('requerimento') }}" class="btn-primary">
+            + Novo Requerimento / Agendamento
+        </a>
+    </div>
+
+    <style>
+        .novo-pedido-acao {
+            margin-bottom: 20px;
+        }
+
+        .dashboard-pedidos,
+        .dashboard-pedidos *,
+        .modal-acao-pedido,
+        .modal-acao-pedido * {
+            box-sizing: border-box;
+        }
+
+        .dashboard-pedidos {
+            width: 100%;
+        }
+
+        .dashboard-pedidos .pedido-id {
+            color: #0f4c5c;
+            font-weight: 800;
+        }
+
+        .dashboard-pedidos .pedido-projeto,
+        .dashboard-pedidos .pedido-equipamento,
+        .dashboard-pedidos .pedido-data {
+            overflow-wrap: anywhere;
+        }
+
+        .pedido-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 7px 10px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            line-height: 1.25;
+            white-space: normal;
+        }
+
+        .pedido-status::before {
+            content: "";
+            flex: 0 0 auto;
+            width: 7px;
+            height: 7px;
+            margin-right: 7px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .pedido-status--pendente {
+            background: #fff4dc;
+            color: #a95d00;
+        }
+
+        .pedido-status--aprovado {
+            background: #e8f7f1;
+            color: #137458;
+        }
+
+        .pedido-status--recusado {
+            background: #fdecee;
+            color: #ba2634;
+        }
+
+        .pedido-status--emprestado {
+            background: #e9f1ff;
+            color: #285ca8;
+        }
+
+        .pedido-status--finalizado {
+            background: #edf2f7;
+            color: #506172;
+        }
+
+        .pedido-status--cancelado {
+            background: #fff0f1;
+            color: #a7343d;
+        }
+
+        .pedido-status--outro {
+            background: #edf2f7;
+            color: #506172;
+        }
+
+        .pedido-acoes-usuario {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 125px;
+        }
+
+        .cancelar-pedido-btn,
+        .excluir-historico-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            font-family: inherit;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .cancelar-pedido-btn {
+            min-height: 40px;
+            padding: 9px 13px;
+            border-radius: 8px;
+            background: #dc3f4b;
+            color: #fff;
+            font-size: 0.84rem;
+            white-space: nowrap;
+        }
+
+        .excluir-historico-btn {
+            min-height: 40px;
+            padding: 9px 13px;
+            border-radius: 8px;
+            background: #dc3f4b;
+            color: #fff;
+            font-size: 0.84rem;
+            line-height: 1.15;
+            white-space: nowrap;
+        }
+
+        .cancelar-pedido-btn:hover,
+        .excluir-historico-btn:hover {
+            filter: brightness(0.92);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 12px rgba(181, 47, 58, 0.16);
+        }
+
+        .acao-indisponivel {
+            color: #a0aab3;
+            font-weight: 700;
+        }
+
+        body.modal-acao-pedido-aberto {
+            overflow: hidden;
+        }
+
+        .modal-acao-pedido[hidden] {
+            display: none;
+        }
+
+        .modal-acao-pedido {
+            --azul: #0f4c5c;
+            --vermelho: #dc3f4b;
+            position: fixed;
+            z-index: 10000;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(22, 35, 50, 0.62);
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-acao-pedido__card {
+            width: min(100%, 510px);
+            padding: 34px 38px 36px;
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 22px 65px rgba(15, 31, 45, 0.28);
+            text-align: center;
+            animation: abrirModalPedido 0.2s ease-out;
+        }
+
+        @keyframes abrirModalPedido {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-acao-pedido__titulo {
+            margin: 0 0 12px;
+            color: #172433;
+            font-size: 1.5rem;
+            line-height: 1.25;
+        }
+
+        .modal-acao-pedido__texto {
+            margin: 0 auto 10px;
+            color: #687786;
+            font-size: 1rem;
+            line-height: 1.55;
+        }
+
+        .modal-acao-pedido__detalhe {
+            margin: 0 auto 28px;
+            padding: 11px 14px;
+            border-radius: 9px;
+            background: #f5f7f9;
+            color: #344b59;
+            font-size: 0.95rem;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
+
+        .modal-acao-pedido__acoes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .modal-acao-pedido__btn {
+            min-height: 52px;
+            padding: 12px 16px;
+            border: 0;
+            border-radius: 9px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.96rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.18s ease, filter 0.18s ease;
+        }
+
+        .modal-acao-pedido__btn:hover {
+            filter: brightness(0.92);
+            transform: translateY(-1px);
+        }
+
+        .modal-acao-pedido__btn--voltar {
+            background: var(--azul);
+        }
+
+        .modal-acao-pedido__btn--confirmar {
+            background: var(--vermelho);
+        }
+
+        @media (max-width: 768px) {
+            .novo-pedido-acao,
+            .novo-pedido-acao .btn-primary {
+                width: 100%;
+            }
+
+            .novo-pedido-acao .btn-primary {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 48px;
+                padding: 11px 14px;
+                text-align: center;
+            }
+
+            .dashboard-pedidos .tabela-admin,
+            .dashboard-pedidos .tabela-admin tbody,
+            .dashboard-pedidos .tabela-admin tr,
+            .dashboard-pedidos .tabela-admin td {
+                display: block;
+                width: 100%;
+            }
+
+            .dashboard-pedidos .tabela-admin {
+                border: 0;
+                background: transparent;
+                box-shadow: none;
+            }
+
+            .dashboard-pedidos .tabela-admin thead {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+
+            .dashboard-pedidos .tabela-admin tbody {
+                display: grid;
+                gap: 16px;
+            }
+
+            .dashboard-pedidos .tabela-admin tr {
+                overflow: hidden;
+                border: 1px solid #dfe7ee;
+                border-radius: 14px;
+                background: #fff;
+                box-shadow: 0 8px 24px rgba(27, 55, 75, 0.09);
+            }
+
+            .dashboard-pedidos .tabela-admin td {
+                display: grid;
+                grid-template-columns: minmax(112px, 36%) minmax(0, 1fr);
+                gap: 12px;
+                align-items: start;
+                padding: 13px 14px;
+                border: 0;
+                border-bottom: 1px solid #edf1f4;
+                text-align: left;
+                white-space: normal;
+                overflow-wrap: anywhere;
+            }
+
+            .dashboard-pedidos .tabela-admin td::before {
+                content: attr(data-label);
+                color: #6a7886;
+                font-size: 0.74rem;
+                font-weight: 800;
+                letter-spacing: 0.04em;
+                line-height: 1.5;
+                text-transform: uppercase;
+            }
+
+            .dashboard-pedidos .tabela-admin td:last-child {
+                display: block;
+                padding: 14px;
+                border-bottom: 0;
+                background: #f8fafc;
+            }
+
+            .dashboard-pedidos .tabela-admin td:last-child::before {
+                display: block;
+                margin-bottom: 10px;
+            }
+
+            .pedido-acoes-usuario {
+                justify-content: flex-start;
+                min-width: 0;
+                width: 100%;
+            }
+
+            .cancelar-pedido-btn {
+                width: 100%;
+                min-height: 44px;
+            }
+
+            .excluir-historico-btn {
+                width: 100%;
+                min-height: 44px;
+            }
+
+            .modal-acao-pedido__card {
+                padding: 28px 22px 24px;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .dashboard-pedidos .tabela-admin td {
+                grid-template-columns: 98px minmax(0, 1fr);
+                padding-inline: 12px;
+            }
+
+            .modal-acao-pedido__acoes {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-acao-pedido__btn--voltar {
+                order: 2;
+            }
+        }
+    </style>
+
+    {% if pedidos %}
+        <div class="dashboard-pedidos">
+            <table class="tabela-admin">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome do Projeto</th>
+                        <th>Equipamento</th>
+                        <th>Data Agendada</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pedido in pedidos %}
+                    {% set status = pedido.status|lower %}
+                    <tr>
+                        <td data-label="ID">
+                            <span class="pedido-id">#{{ pedido.id }}</span>
+                        </td>
+
+                        <td data-label="Nome do projeto">
+                            <span class="pedido-projeto">{{ pedido.titulo_projeto }}</span>
+                        </td>
+
+                        <td data-label="Equipamento">
+                            <strong class="pedido-equipamento">{{ pedido.equipamento }}</strong>
+                        </td>
+
+                        <td data-label="Data agendada">
+                            <span class="pedido-data">{{ pedido.data_agendada }}</span>
+                        </td>
+
+                        <td data-label="Status">
+                            {% if status in ['pendente', 'pendente_encarregado'] %}
+                                <span class="pedido-status pedido-status--pendente">Pendente de análise</span>
+                            {% elif status == 'aprovado' %}
+                                <span class="pedido-status pedido-status--aprovado">Aprovado</span>
+                            {% elif status == 'recusado' %}
+                                <span class="pedido-status pedido-status--recusado">Recusado</span>
+                            {% elif status == 'emprestado' %}
+                                <span class="pedido-status pedido-status--emprestado">Em uso</span>
+                            {% elif status == 'finalizado' %}
+                                <span class="pedido-status pedido-status--finalizado">Finalizado</span>
+                            {% elif status == 'cancelado' %}
+                                <span class="pedido-status pedido-status--cancelado">Cancelado</span>
+                            {% else %}
+                                <span class="pedido-status pedido-status--outro">
+                                    {{ pedido.status|replace('_', ' ')|capitalize }}
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td data-label="Ações">
+                            <div class="pedido-acoes-usuario">
+                                {% if status in ['pendente', 'pendente_encarregado', 'aprovado'] %}
+                                    <button type="button"
+                                            class="cancelar-pedido-btn js-acao-pedido"
+                                            data-tipo="cancelar"
+                                            data-url="/pedido/cancelar/{{ pedido.id }}"
+                                            data-pedido-id="{{ pedido.id }}"
+                                            data-projeto="{{ pedido.titulo_projeto }}">
+                                        Cancelar pedido
+                                    </button>
+                                {% elif status in ['recusado', 'finalizado', 'cancelado'] %}
+                                    <button type="button"
+                                            class="excluir-historico-btn js-acao-pedido"
+                                            data-tipo="excluir"
+                                            data-url="/pedido/excluir-historico/{{ pedido.id }}"
+                                            data-pedido-id="{{ pedido.id }}"
+                                            data-projeto="{{ pedido.titulo_projeto }}"
+                                            aria-label="Apagar pedido {{ pedido.id }} do histórico"
+                                            title="Apagar histórico">
+                                        Apagar histórico
+                                    </button>
+                                {% else %}
+                                    <span class="acao-indisponivel">—</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert">
+            <p>Você ainda não realizou nenhum agendamento ou requerimento.</p>
+        </div>
+    {% endif %}
+
+    <div id="modal-acao-pedido"
+         class="modal-acao-pedido"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modal-acao-pedido-titulo"
+         aria-describedby="modal-acao-pedido-texto"
+         hidden>
+        <form id="form-acao-pedido" method="POST" class="modal-acao-pedido__card">
+            {% if csrf_token is defined %}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% endif %}
+
+            <h3 id="modal-acao-pedido-titulo" class="modal-acao-pedido__titulo"></h3>
+            <p id="modal-acao-pedido-texto" class="modal-acao-pedido__texto"></p>
+            <p id="modal-acao-pedido-detalhe" class="modal-acao-pedido__detalhe"></p>
+
+            <div class="modal-acao-pedido__acoes">
+                <button type="button"
+                        id="voltar-acao-pedido"
+                        class="modal-acao-pedido__btn modal-acao-pedido__btn--voltar">
+                    Voltar
+                </button>
+
+                <button type="submit"
+                        id="confirmar-acao-pedido"
+                        class="modal-acao-pedido__btn modal-acao-pedido__btn--confirmar">
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        (function () {
+            const modal = document.getElementById('modal-acao-pedido');
+            const formulario = document.getElementById('form-acao-pedido');
+            const titulo = document.getElementById('modal-acao-pedido-titulo');
+            const texto = document.getElementById('modal-acao-pedido-texto');
+            const detalhe = document.getElementById('modal-acao-pedido-detalhe');
+            const botaoVoltar = document.getElementById('voltar-acao-pedido');
+            const botaoConfirmar = document.getElementById('confirmar-acao-pedido');
+
+            let botaoQueAbriu = null;
+
+            function fecharModal() {
+                modal.hidden = true;
+                formulario.removeAttribute('action');
+                document.body.classList.remove('modal-acao-pedido-aberto');
+
+                if (botaoQueAbriu) {
+                    botaoQueAbriu.focus();
+                }
+            }
+
+            function abrirModal(botao) {
+                const tipo = botao.dataset.tipo;
+                const pedidoId = botao.dataset.pedidoId;
+                const projeto = botao.dataset.projeto;
+
+                botaoQueAbriu = botao;
+                formulario.action = botao.dataset.url;
+                detalhe.textContent = 'Pedido #' + pedidoId + ' — ' + projeto;
+
+                if (tipo === 'cancelar') {
+                    titulo.textContent = 'Cancelar pedido';
+                    texto.textContent =
+                        'Tem certeza que deseja cancelar este pedido? Ele não seguirá para aprovação ou empréstimo.';
+                    botaoConfirmar.textContent = 'Sim, cancelar pedido';
+                } else {
+                    titulo.textContent = 'Apagar histórico';
+                    texto.textContent =
+                        'Tem certeza que deseja apagar este pedido do seu histórico? Esta ação não poderá ser desfeita.';
+                    botaoConfirmar.textContent = 'Sim, apagar histórico';
+                }
+
+                modal.hidden = false;
+                document.body.classList.add('modal-acao-pedido-aberto');
+                botaoConfirmar.focus();
+            }
+
+            document.querySelectorAll('.js-acao-pedido').forEach(function (botao) {
+                botao.addEventListener('click', function (evento) {
+                    evento.preventDefault();
+                    evento.stopImmediatePropagation();
+                    abrirModal(botao);
+                }, true);
+            });
+
+            botaoVoltar.addEventListener('click', fecharModal);
+
+            modal.addEventListener('click', function (evento) {
+                if (evento.target === modal) {
+                    fecharModal();
+                }
+            });
+
+            document.addEventListener('keydown', function (evento) {
+                if (evento.key === 'Escape' && !modal.hidden) {
+                    fecharModal();
+                }
+            });
+        })();
+    </script>
+
+{% endblock %}

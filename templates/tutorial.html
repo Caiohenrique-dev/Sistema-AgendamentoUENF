@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Tutorial do Sistema - LECIV{% endblock %}
+
+{% block content %}
+
+    <div style="text-align: center; margin-bottom: 2.5rem;">
+        <h2 style="margin-bottom: 0.5rem;">Central de Ajuda</h2>
+        <p>Como utilizar o Sistema de Empréstimos LECIV</p>
+    </div>
+
+    <p style="text-align: center; margin-bottom: 2.5rem;">
+        Bem-vindo ao guia rápido do sistema! Abaixo você encontra o passo a passo de como utilizar a plataforma, dividido de acordo com o seu nível de acesso.
+    </p>
+
+    <!-- seção usuario / aluno -->
+    <fieldset style="margin-bottom: 2rem;">
+        <legend style="font-size: 1.25rem;">1. Para Usuários e Alunos</legend>
+        <p>Se você é um aluno ou pesquisador, você utilizará o sistema para solicitar equipamentos e acompanhar o status da sua aprovação.</p>
+        <ul style="margin-left: 1.5rem; color: var(--text-muted); line-height: 1.8;">
+            <li><strong>Primeiro Acesso (Cadastro):</strong> Caso você ainda não tenha um cadastro no sistema, é necessário criar uma conta antes de realizar qualquer solicitação. Na tela inicial de login, clique na opção "Criar nova conta", preencha todos os seus dados corretamente e conclua o registro para liberar o seu acesso.</li>
+            <li><strong>Fazer um Requerimento:</strong> Com o acesso liberado, vá até a aba de novos pedidos, preencha o formulário completo com os seus dados, os detalhes do projeto e selecione o equipamento desejado.</li>
+            <li><strong>Acompanhar o Status:</strong> Na aba "Meus Pedidos", você verá o seu histórico. Seu pedido entrará inicialmente com o status de <em>pendente_encarregado</em>.</li>
+            <li><strong>Aprovação:</strong> Caso o responsável avalie e aprove, o status mudará para <em>emprestado</em>, e você poderá retirar o equipamento fisicamente no laboratório.</li>
+            <li><strong>Devolução:</strong> Após o período de uso, devolva a ferramenta em mãos. O Encarregado registrará a sua devolução e seu pedido constará como <em>finalizado</em> no sistema.</li>
+        </ul>
+    </fieldset>
+    <!-- seção encarregado -->
+    <fieldset style="margin-bottom: 2rem;">
+        <legend style="font-size: 1.25rem;">2. Para Encarregados</legend>
+        <p>Você é o responsável físico por um ou mais equipamentos da instituição. Seu papel é gerenciar as aprovações e garantir as devoluções.</p>
+        <ul style="margin-left: 1.5rem; color: var(--text-muted); line-height: 1.8;">
+            <li><strong>Avaliar Pedidos:</strong> Em "Meu Painel", aparecerão apenas os requerimentos solicitando as ferramentas vinculadas a você. Você deve <strong>Aprovar</strong> ou <strong>Reprovar</strong> a solicitação.</li>
+            <li><strong>Meus Empréstimos:</strong> Aqui ficam todos os equipamentos que você aprovou e que estão atualmente em uso pelos alunos (status <em>ativo</em>).</li>
+            <li><strong>Finalizar Empréstimo:</strong> Assim que o aluno devolver o equipamento em mãos, acesse a aba "Meus Empréstimos" e clique em <strong>Finalizar</strong>. Isso dará baixa no sistema e liberará a ferramenta para os próximos alunos.</li>
+        </ul>
+    </fieldset>
+
+    <!-- seção admin -->
+    <fieldset style="margin-bottom: 2rem;">
+        <legend style="font-size: 1.25rem;">3. Para Administradores</legend>
+        <p>O Administrador possui controle total, sendo responsável pelo cadastro estrutural e por atuar em caso de ausência de encarregados.</p>
+        <ul style="margin-left: 1.5rem; color: var(--text-muted); line-height: 1.8;">
+            <li><strong>Gestão de Ferramentas:</strong> Adicione novos equipamentos registrando o Patrimônio e a Subunidade. <strong>Atenção:</strong> É obrigatório vincular a ferramenta a um Encarregado cadastrado no sistema.</li>
+            <li><strong>Gestão de Usuários:</strong> Acompanhe os alunos cadastrados e remova usuários se necessário.</li>
+            <li><strong>Dashboard Geral:</strong> Visualize no painel principal absolutamente todos os empréstimos ativos no momento, não importa de qual laboratório ou encarregado sejam.</li>
+            <li><strong>Modo de Representação:</strong> Se um Encarregado faltar, o Admin pode usar a função "Selecionar Encarregado". O sistema fará o login administrativo atuar no lugar dele, permitindo aprovar pedidos e finalizar devoluções daquela respectiva área.</li>
+        </ul>
+    </fieldset>
+
+    <div style="margin-top: 3rem; text-align: center;">
+        <button onclick="history.back()" class="btn-primary" style="padding: 0.75rem 3rem; font-size: 1rem;">
+            Voltar
+        </button>
+    </div>
+
+{% endblock %}

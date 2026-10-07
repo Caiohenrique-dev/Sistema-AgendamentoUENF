@@ -1,0 +1,848 @@
+/* =========================================
+   1. Variáveis e Configurações (Premium)
+========================================= */
+:root {
+    /* cores da maarca  */
+    --brand: #0f4c5c;        /* azul/verde escuro elegante */
+    --brand-hover: #0a3641;
+    --brand-light: #e0f2fe;  /* fundo sutil ao passar o mouse em tabelas */
+    
+    /* cores de interface */
+    --bg-body: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    
+    /* estados */
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --success: #10b981;
+    --success-hover: #059669;
+    
+    /* sombras modernas  */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    
+    /* bordas e transições */
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --transition: all 0.2s ease-in-out;
+}
+
+/* =========================================
+   2. reset e base
+========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body { 
+    height: 100%; 
+}
+
+body {
+    /* fonte do google (inter) p visual limpo */
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    
+    /* imagem de Fundo com um overlay claro para não atrapalhar a leitura */
+    background: linear-gradient(rgba(248, 250, 252, 0.85), rgba(248, 250, 252, 0.85)), url("fundo.jpg") no-repeat center center fixed;
+    background-size: cover;
+    
+    color: var(--text-main);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================
+   3. topo e navegação 
+========================================= */
+.navbar {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+}
+
+.navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--brand);
+    letter-spacing: -0.025em;
+}
+
+.logo span {
+    color: var(--text-muted);
+    margin-left: 4px;
+    font-weight: 500;
+}
+
+.menu-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.nav-link {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: var(--transition);
+    padding: 0.5rem 0;
+    text-decoration: none;
+}
+
+.nav-link:hover {
+    color: var(--brand);
+}
+
+.divider {
+    width: 1px;
+    height: 24px;
+    background-color: var(--border-color);
+    margin: 0 0.5rem;
+}
+/* logo com imagem */
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.logo-img {
+    height: 40px; /* altura do logo */
+    width: auto;
+    object-fit: contain;
+}
+
+/* botão Hamburguer invisível no desktop */
+.btn-mobile {
+    display: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 101;
+}
+
+.hamburger {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--text-main);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.hamburger::before, .hamburger::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: var(--text-main);
+    left: 0;
+    transition: all 0.3s ease;
+}
+
+.hamburger::before { top: -7px; }
+.hamburger::after { top: 7px; }
+
+/* animação do hamburguer virando um "X" */
+.btn-mobile.active .hamburger { background: transparent; }
+.btn-mobile.active .hamburger::before {
+    top: 0;
+    transform: rotate(45deg);
+}
+.btn-mobile.active .hamburger::after {
+    top: 0;
+    transform: rotate(-45deg);
+}
+
+/* =========================================
+   4. containers principais
+========================================= */
+.main-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+/* container branco com sombra suave para todo o conteúdo */
+.container, .content-card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 2.5rem;
+    border: 1px solid var(--border-color);
+}
+
+/* ajustes para login */
+.login-wrapper, .container-pequeno {
+    max-width: 480px; 
+    margin: 4rem auto; /* centraliza na tela */
+}
+
+/* =========================================
+   5. títulos e tipografia
+========================================= */
+h2 {
+    text-align: center;
+    color: var(--brand);
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+
+p {
+    margin-bottom: 1rem;
+    color: var(--text-muted);
+}
+
+/* =========================================
+   6. formulários (minimalistas e premium)
+========================================= */
+form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: #f8fafc;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--text-main);
+    transition: var(--transition);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--brand);
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(15, 76, 92, 0.15); /* efeito focus ring premium */
+}
+
+fieldset {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background: #fff;
+}
+
+legend {
+    padding: 0 0.5rem;
+    font-weight: 600;
+    color: var(--brand);
+    font-size: 1rem;
+}
+
+/* =========================================
+   7. botões profissionais
+========================================= */
+button, .btn-primary, .btn-add, .btn-enviar, .botao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    background: var(--brand);
+    color: #fff !important;
+    border: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    box-shadow: var(--shadow-sm);
+}
+
+button:hover, .btn-primary:hover, .btn-add:hover, .btn-enviar:hover, .botao:hover {
+    background: var(--brand-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-enviar {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+/* botões pequenos (aprovar/recusar) nas tabelas */
+.btn-aprovar, .btn-recusar, .botao-excluir, .btn-outline-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    border: 1px solid transparent;
+}
+
+.btn-aprovar { background-color: var(--success); color: white; }
+.btn-aprovar:hover { background-color: var(--success-hover); }
+
+.btn-recusar, .botao-excluir { background-color: var(--danger); color: white; }
+.btn-recusar:hover, .botao-excluir:hover { background-color: var(--danger-hover); }
+
+/* botão sair da navbar (estilo outline) */
+.btn-outline-danger {
+    background-color: transparent;
+    color: var(--danger);
+    border-color: #fca5a5;
+}
+.btn-outline-danger:hover {
+    background-color: #fef2f2;
+    border-color: var(--danger);
+}
+
+/* =========================================
+   8. tabelas admin (design clean)
+========================================= */
+table, .tabela-admin {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 1.5rem;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+}
+
+th {
+    background: #f1f5f9; /* fundo cinza super claro */
+    color: var(--text-muted);
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.95rem;
+    vertical-align: middle;
+    background: #fff;
+    transition: background-color 0.15s ease;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background-color: #f8fafc; }
+
+/* =========================================
+   9. msg (flash / alertas)
+========================================= */
+.flash-container, .flash-messages {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0;
+}
+
+.flash, .alert, .flash-messages li {
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-left: 4px solid var(--brand);
+    background-color: #eff6ff;
+    color: #1e3a8a;
+    box-shadow: var(--shadow-sm);
+    list-style: none;
+}
+
+.flash.success, .alert.success, .alert-success {
+    border-left-color: #10b981;
+    background-color: #ecfdf5;
+    color: #065f46;
+}
+
+.flash.error, .alert.error, .alert-danger {
+    border-left-color: var(--danger);
+    background-color: #fef2f2;
+    color: #991b1b;
+}
+
+/* =========================================
+   10. dashboard cards
+========================================= */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.card-opcao {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    text-align: center;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 120px;
+}
+
+.card-opcao:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: #cbd5e1;
+}
+
+.card-opcao h3 {
+    color: var(--brand);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* =========================================
+   11. responsividade especializada (celular)
+========================================= */
+
+/* tudo que estiver dentro desta chave { } só vai funcionar em telas menores que 900px */
+@media (max-width: 900px) {
+    
+    /* mostra o botão hamburguer no celular */
+    .btn-mobile {
+        display: block !important; 
+    }
+
+    /* navbar ajustada para telas menores */
+    .navbar-container {
+        display: flex;
+        flex-direction: row; 
+        justify-content: space-between;
+        align-items: center;
+        height: 4.5rem;
+        padding: 0 1.5rem;
+    }
+
+    /* o  menu vira uma gaveta escondida no celular */
+    .menu-nav {
+        position: absolute;
+        top: 4.5rem;
+        left: 0;
+        width: 100%;
+        background-color: var(--card-bg);
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1.5rem;
+        gap: 1rem;
+        box-shadow: var(--shadow-md);
+        border-bottom: 1px solid var(--border-color);
+        
+        /* esconde o menu por padrão com uma animação elegante */
+        clip-path: inset(0 0 100% 0); 
+        transition: clip-path 0.4s ease-in-out;
+    }
+    
+    /* quando ativo (clicado), mostra a gaveta */
+    .menu-nav.active {
+        clip-path: inset(0 0 0 0);
+    }
+    
+    .nav-link {
+        font-size: 1.1rem; /* letras maiores no celular para clicar fácil */
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .divider { display: none; }
+
+    /* ajuste de containers mobile */
+    .main-container {
+        padding: 0 1rem;
+        margin-top: 1rem;
+    }
+
+    .container, .content-card {
+        padding: 1.5rem;
+    }
+
+    .login-wrapper, .container-pequeno {
+        margin: 2rem auto;
+        padding: 2rem 1.5rem;
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* formulários Grandes para Dedos */
+    input, select, textarea {
+        font-size: 16px !important; /* previne zoom automático no iOS */
+        padding: 0.875rem 1rem;
+    }
+
+    button, .btn-primary, .btn-enviar {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+
+    /* tabela horizontal no Celular com Quebra de Texto Automática */
+    .tabela-admin {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        white-space: normal; 
+    }
+
+    th, td {
+        padding: 0.75rem 1rem;
+    }
+
+    .tabela-admin td {
+        white-space: normal; /* garante que o texto longo vai descer e não cortar */
+        word-wrap: break-word; /* quebra palavras muito compridas se necessário */
+        min-width: 130px; /* da um espaço mínimo para a coluna respirar */
+    }
+}
+/* =========================================
+   12. modal customizado
+========================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.6); /* fundo escurecido semi-transparente */
+    backdrop-filter: blur(4px); /* efeito de desfoque no fundo */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 1;
+    visibility: visible;
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.modal-box {
+    background-color: #ffffff;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    text-align: center;
+    transform: scale(1);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-overlay.hidden .modal-box {
+    transform: scale(0.95);
+}
+
+.modal-icon {
+    width: 56px;
+    height: 56px;
+    background-color: #fef2f2;
+    color: var(--danger);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem auto;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+}
+
+.modal-text {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.modal-actions button {
+    flex: 1; /* faz os botões terem o mesmo tamanho */
+    padding: 0.75rem 1rem;
+}
+
+.btn-cancelar {
+    background-color: #f1f5f9;
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-cancelar:hover {
+    background-color: #e2e8f0;
+}
+
+.btn-danger-solid {
+    background-color: var(--danger);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-danger-solid:hover {
+    background-color: var(--danger-hover);
+    box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2);
+}
+/* =========================================
+   13. rodapé (footer) e ajuste de Tela
+========================================= */
+
+/* esse truque no body garante que o rodapé fique sempre no final, 
+   mesmo se a tela estiver vazia */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-container {
+    flex: 1 0 auto; /* empurra o rodapé para o fim da tela */
+    width: 100%;
+}
+
+.site-footer {
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border-top: 1px solid var(--border-color);
+    background-color: transparent;
+    flex-shrink: 0; /* impede que o rodapé seja esmagado */
+}
+
+.site-footer p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.site-footer a {
+    color: var(--brand);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.site-footer a:hover {
+    color: var(--brand-hover);
+    text-decoration: underline;
+}
+/* =========================================
+   13. manter o hamburguer so pra celular
+========================================= */
+/* força o hambúrguer a sumir no computador e só aparecer no celular */
+.btn-mobile {
+    display: none !important;
+}
+
+@media (max-width: 900px) {
+    .btn-mobile {
+        display: block !important;
+    }
+}
+/* =========================================
+   14. página de Login
+========================================= */
+
+.login-content {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 1rem 0;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-logo {
+    height: 70px;
+    width: auto;
+    object-fit: contain;
+    margin-bottom: 1.25rem;
+}
+
+.login-title {
+    color: var(--text-main);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.025em;
+}
+
+.login-subtitle {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.input-group {
+    margin-bottom: 1.25rem;
+    text-align: left;
+}
+
+.login-btn {
+    margin-top: 1rem;
+    font-size: 1rem;
+    width: 100%;
+}
+
+.btn-icon {
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* rodapé do login - seção criar Conta */
+.login-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.login-footer p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.link-destaque {
+    color: var(--brand);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-block;
+    margin-top: 0.5rem;
+}
+
+.link-destaque:hover {
+    color: var(--brand-hover);
+    text-decoration: underline;
+}
+/* =========================================
+   15. tela de abbertura (Splash Screen)
+========================================= */
+#splash-screen {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+
+    background-color: #f8fafc;
+    z-index: 99999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: opacity 0.6s ease-out;
+}
+
+#intro-video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    pointer-events: none;
+}
+
+/* Celular e tablet */
+@media (max-width: 900px) {
+    #splash-screen {
+        width: 100vw;
+        height: 100dvh;
+        overflow: hidden;
+        background-color: #f8fafc;
+    }
+
+    #intro-video {
+        width: 100vw;
+        height: 100dvh;
+        object-fit: contain !important;
+        object-position: center center !important;
+        background-color: #f8fafc;
+    }
+}
+
+.esconder-splash {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.btn-cancelar {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+    border: 1px solid #2563eb !important;
+}
+
+.btn-cancelar:hover {
+    background-color: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+}

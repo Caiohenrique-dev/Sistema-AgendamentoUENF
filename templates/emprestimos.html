@@ -1,0 +1,666 @@
+{% extends "base.html" %}
+{% block title %}Empréstimos Ativos{% endblock %}
+
+{% block content %}
+
+<style>
+    .emprestimos-painel,
+    .emprestimos-painel *,
+    .modal-devolucao,
+    .modal-devolucao * {
+        box-sizing: border-box;
+    }
+
+    .emprestimos-painel {
+        --azul: #0f4c5c;
+        --azul-hover: #0a3945;
+        --verde: #16a377;
+        --verde-hover: #10805e;
+        --texto: #243342;
+        --texto-suave: #687786;
+        --borda: #dfe7ee;
+        width: 100%;
+        color: var(--texto);
+    }
+
+    .emprestimos-cabecalho {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 24px;
+    }
+
+    .emprestimos-titulo h2 {
+        margin: 0 0 6px;
+        color: var(--azul);
+        font-size: clamp(1.7rem, 3vw, 2.15rem);
+        line-height: 1.2;
+    }
+
+    .emprestimos-titulo p {
+        margin: 0;
+        color: var(--texto-suave);
+        font-size: 0.98rem;
+    }
+
+    .emprestimos-contador {
+        flex: 0 0 auto;
+        padding: 9px 14px;
+        border: 1px solid #c8dfe5;
+        border-radius: 999px;
+        background: #eaf4f6;
+        color: var(--azul);
+        font-size: 0.88rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .responsavel-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 25px;
+        padding: 16px 18px;
+        border: 1px solid #c9dfe5;
+        border-left: 5px solid var(--azul);
+        border-radius: 12px;
+        background: #edf6f8;
+        color: #244b58;
+        box-shadow: 0 5px 16px rgba(15, 76, 92, 0.07);
+    }
+
+    .responsavel-card__icone {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--azul);
+        color: #fff;
+    }
+
+    .responsavel-card__icone svg {
+        width: 21px;
+        height: 21px;
+        fill: currentColor;
+    }
+
+    .responsavel-card p {
+        margin: 0;
+        line-height: 1.45;
+    }
+
+    .emprestimos-tabela-container {
+        overflow: hidden;
+        border: 1px solid var(--borda);
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 10px 30px rgba(27, 55, 75, 0.09);
+    }
+
+    .emprestimos-painel .tabela-admin {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+        table-layout: auto;
+    }
+
+    .emprestimos-painel .tabela-admin th,
+    .emprestimos-painel .tabela-admin td {
+        padding: 16px 14px;
+        border: 0;
+        border-bottom: 1px solid var(--borda);
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .emprestimos-painel .tabela-admin th {
+        background: #eef2f7;
+        color: #667584;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.055em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .emprestimos-painel .tabela-admin tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .emprestimos-painel .tabela-admin tbody tr:hover {
+        background: #f8fbfc;
+    }
+
+    .emprestimos-painel .tabela-admin tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .emprestimo-id {
+        color: var(--azul);
+        font-weight: 800;
+    }
+
+    .emprestimo-aluno,
+    .emprestimo-equipamento,
+    .emprestimo-data {
+        overflow-wrap: anywhere;
+        word-break: normal;
+    }
+
+    .emprestimo-equipamento {
+        color: #172433;
+    }
+
+    .emprestimo-acoes {
+        min-width: 175px;
+    }
+
+    .emprestimos-painel .emprestimo-btn,
+    .emprestimos-painel .btn-voltar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 10px 15px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        color: #fff;
+        font-family: inherit;
+        font-size: 0.88rem;
+        font-weight: 750;
+        line-height: 1.15;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    }
+
+    .emprestimos-painel .emprestimo-btn {
+        width: 100%;
+        background: var(--verde);
+    }
+
+    .emprestimos-painel .emprestimo-btn:hover {
+        background: var(--verde-hover);
+        color: #fff;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(22, 163, 119, 0.22);
+    }
+
+    .emprestimos-vazio {
+        padding: 34px 20px;
+        border: 1px solid #cbdce2;
+        border-radius: 14px;
+        background: #f3f8fa;
+        color: #42616c;
+        text-align: center;
+    }
+
+    .emprestimos-vazio__icone {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 2rem;
+    }
+
+    .emprestimos-vazio h3 {
+        margin: 0 0 6px;
+        color: var(--azul);
+    }
+
+    .emprestimos-vazio p {
+        margin: 0;
+    }
+
+    .emprestimos-rodape {
+        display: flex;
+        margin-top: 22px;
+    }
+
+    .emprestimos-painel .btn-voltar {
+        background: var(--azul);
+    }
+
+    .emprestimos-painel .btn-voltar:hover {
+        background: var(--azul-hover);
+        color: #fff;
+        text-decoration: none;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(15, 76, 92, 0.2);
+    }
+
+    body.modal-devolucao-aberto {
+        overflow: hidden;
+    }
+
+    .modal-devolucao[hidden] {
+        display: none;
+    }
+
+    .modal-devolucao {
+        --azul: #0f4c5c;
+        --verde: #16a377;
+        position: fixed;
+        z-index: 10000;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(22, 35, 50, 0.62);
+        backdrop-filter: blur(3px);
+    }
+
+    .modal-devolucao__caixa {
+        width: min(100%, 510px);
+        padding: 34px 38px 36px;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 22px 65px rgba(15, 31, 45, 0.28);
+        text-align: center;
+        animation: abrirModalDevolucao 0.2s ease-out;
+    }
+
+    @keyframes abrirModalDevolucao {
+        from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .modal-devolucao__icone {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 68px;
+        height: 68px;
+        margin-bottom: 22px;
+        border-radius: 50%;
+        background: #e9f8f2;
+        color: var(--verde);
+        font-size: 2rem;
+        font-weight: 900;
+    }
+
+    .modal-devolucao__titulo {
+        margin: 0 0 12px;
+        color: #172433;
+        font-size: 1.5rem;
+        line-height: 1.25;
+    }
+
+    .modal-devolucao__texto {
+        margin: 0 auto 10px;
+        color: #687786;
+        font-size: 1rem;
+        line-height: 1.55;
+    }
+
+    .modal-devolucao__equipamento {
+        margin: 0 auto 28px;
+        padding: 11px 14px;
+        border-radius: 9px;
+        background: #f0f6f7;
+        color: #244b58;
+        font-size: 0.95rem;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    .modal-devolucao__acoes {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .modal-devolucao__btn {
+        min-height: 52px;
+        padding: 12px 16px;
+        border: 0;
+        border-radius: 9px;
+        color: #fff;
+        font-family: inherit;
+        font-size: 0.96rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: transform 0.18s ease, filter 0.18s ease;
+    }
+
+    .modal-devolucao__btn:hover {
+        filter: brightness(0.92);
+        transform: translateY(-1px);
+    }
+
+    .modal-devolucao__btn--cancelar {
+        background: var(--azul);
+    }
+
+    .modal-devolucao__btn--confirmar {
+        background: var(--verde);
+    }
+
+    @media (max-width: 768px) {
+        .emprestimos-cabecalho {
+            align-items: flex-start;
+            flex-direction: column;
+            margin-bottom: 18px;
+        }
+
+        .emprestimos-contador {
+            align-self: flex-start;
+        }
+
+        .responsavel-card {
+            align-items: flex-start;
+            padding: 14px;
+        }
+
+        .emprestimos-tabela-container {
+            overflow: visible;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .emprestimos-painel .tabela-admin,
+        .emprestimos-painel .tabela-admin tbody,
+        .emprestimos-painel .tabela-admin tr,
+        .emprestimos-painel .tabela-admin td {
+            display: block;
+            width: 100%;
+        }
+
+        .emprestimos-painel .tabela-admin thead {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .emprestimos-painel .tabela-admin tbody {
+            display: grid;
+            gap: 16px;
+        }
+
+        .emprestimos-painel .tabela-admin tr {
+            overflow: hidden;
+            border: 1px solid var(--borda);
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(27, 55, 75, 0.09);
+        }
+
+        .emprestimos-painel .tabela-admin tbody tr:hover {
+            background: #fff;
+        }
+
+        .emprestimos-painel .tabela-admin td {
+            display: grid;
+            grid-template-columns: minmax(105px, 36%) minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            padding: 13px 14px;
+            border-bottom: 1px solid #edf1f4;
+            white-space: normal;
+        }
+
+        .emprestimos-painel .tabela-admin td::before {
+            content: attr(data-label);
+            color: #6a7886;
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.045em;
+            line-height: 1.5;
+            text-transform: uppercase;
+        }
+
+        .emprestimos-painel .tabela-admin td:last-child {
+            display: block;
+            padding: 14px;
+            border-bottom: 0;
+            background: #f8fafc;
+        }
+
+        .emprestimos-painel .tabela-admin td:last-child::before {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .emprestimo-acoes {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .emprestimos-painel .emprestimo-btn,
+        .emprestimos-painel .btn-voltar {
+            width: 100%;
+            min-height: 46px;
+        }
+
+        .modal-devolucao__caixa {
+            padding: 28px 22px 24px;
+        }
+    }
+
+    @media (max-width: 430px) {
+        .emprestimos-painel .tabela-admin td {
+            grid-template-columns: 92px minmax(0, 1fr);
+            padding-inline: 12px;
+        }
+
+        .modal-devolucao__acoes {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-devolucao__btn--cancelar {
+            order: 2;
+        }
+    }
+</style>
+
+<section class="emprestimos-painel">
+    <header class="emprestimos-cabecalho">
+        <div class="emprestimos-titulo">
+            <h2>Meus Empréstimos Ativos</h2>
+            <p>Acompanhe os equipamentos que ainda estão em uso.</p>
+        </div>
+
+        {% if emprestimos %}
+            <span class="emprestimos-contador">
+                {{ emprestimos|length }}
+                {{ 'empréstimo ativo' if emprestimos|length == 1 else 'empréstimos ativos' }}
+            </span>
+        {% endif %}
+    </header>
+
+    <div class="responsavel-card">
+        <span class="responsavel-card__icone" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-5.05 0-9 2.42-9 5.5V22h18v-2.5C21 16.42 17.05 14 12 14Z"/>
+            </svg>
+        </span>
+        <p>
+            Encarregado responsável:
+            <strong>{{ session.get('nome') }}</strong>
+        </p>
+    </div>
+
+    {% if emprestimos %}
+        <div class="emprestimos-tabela-container">
+            <table class="tabela-admin">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Aluno</th>
+                        <th>Equipamento</th>
+                        <th>Data da retirada</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in emprestimos %}
+                    <tr>
+                        <td data-label="ID">
+                            <span class="emprestimo-id">#{{ e.id }}</span>
+                        </td>
+
+                        <td data-label="Aluno">
+                            <span class="emprestimo-aluno">{{ e.nome_aluno }}</span>
+                        </td>
+
+                        <td data-label="Equipamento">
+                            <strong class="emprestimo-equipamento">{{ e.equipamento }}</strong>
+                        </td>
+
+                        <td data-label="Data da retirada">
+                            <span class="emprestimo-data">{{ e.data_inicio }}</span>
+                        </td>
+
+                        <td data-label="Ação">
+                            <div class="emprestimo-acoes">
+                                <button type="button"
+                                        class="emprestimo-btn js-confirmar-devolucao"
+                                        data-url="{{ url_for('finalizar_emprestimo_encarregado', id=e.id) }}"
+                                        data-emprestimo-id="{{ e.id }}"
+                                        data-aluno="{{ e.nome_aluno }}"
+                                        data-equipamento="{{ e.equipamento }}">
+                                    Receber / Finalizar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="emprestimos-vazio" role="status">
+            <span class="emprestimos-vazio__icone" aria-hidden="true">✓</span>
+            <h3>Nenhum empréstimo ativo</h3>
+            <p>Nenhum equipamento está emprestado sob sua responsabilidade no momento.</p>
+        </div>
+    {% endif %}
+
+    <div class="emprestimos-rodape">
+        <a href="{{ url_for('painel_encarregado') }}" class="btn-voltar">
+            Voltar ao Painel
+        </a>
+    </div>
+</section>
+
+<div id="modal-confirmar-devolucao"
+     class="modal-devolucao"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="modal-devolucao-titulo"
+     aria-describedby="modal-devolucao-texto"
+     hidden>
+    <div class="modal-devolucao__caixa">
+        <span class="modal-devolucao__icone" aria-hidden="true">✓</span>
+
+        <h3 id="modal-devolucao-titulo" class="modal-devolucao__titulo">
+            Confirmar devolução
+        </h3>
+
+        <p id="modal-devolucao-texto" class="modal-devolucao__texto"></p>
+        <p id="modal-devolucao-equipamento" class="modal-devolucao__equipamento"></p>
+
+        <div class="modal-devolucao__acoes">
+            <button type="button"
+                    id="cancelar-devolucao"
+                    class="modal-devolucao__btn modal-devolucao__btn--cancelar">
+                Cancelar
+            </button>
+
+            <button type="button"
+                    id="confirmar-devolucao"
+                    class="modal-devolucao__btn modal-devolucao__btn--confirmar">
+                Sim, receber e finalizar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const modal = document.getElementById('modal-confirmar-devolucao');
+        const texto = document.getElementById('modal-devolucao-texto');
+        const equipamentoTexto = document.getElementById('modal-devolucao-equipamento');
+        const botaoCancelar = document.getElementById('cancelar-devolucao');
+        const botaoConfirmar = document.getElementById('confirmar-devolucao');
+
+        let urlDaDevolucao = '';
+        let botaoQueAbriu = null;
+
+        function fecharModal() {
+            modal.hidden = true;
+            document.body.classList.remove('modal-devolucao-aberto');
+
+            if (botaoQueAbriu) {
+                botaoQueAbriu.focus();
+            }
+        }
+
+        function abrirModal(botao) {
+            const emprestimoId = botao.dataset.emprestimoId;
+            const aluno = botao.dataset.aluno;
+            const equipamento = botao.dataset.equipamento;
+
+            urlDaDevolucao = botao.dataset.url;
+            botaoQueAbriu = botao;
+
+            texto.textContent =
+                'Confirma que o aluno ' + aluno +
+                ' devolveu o equipamento do empréstimo #' + emprestimoId + '?';
+
+            equipamentoTexto.textContent = equipamento;
+
+            modal.hidden = false;
+            document.body.classList.add('modal-devolucao-aberto');
+            botaoConfirmar.focus();
+        }
+
+        document.querySelectorAll('.js-confirmar-devolucao').forEach(function (botao) {
+            botao.addEventListener('click', function (evento) {
+                evento.preventDefault();
+                evento.stopImmediatePropagation();
+                abrirModal(botao);
+            }, true);
+        });
+
+        botaoCancelar.addEventListener('click', fecharModal);
+
+        botaoConfirmar.addEventListener('click', function () {
+            if (urlDaDevolucao) {
+                window.location.assign(urlDaDevolucao);
+            }
+        });
+
+        modal.addEventListener('click', function (evento) {
+            if (evento.target === modal) {
+                fecharModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (evento) {
+            if (evento.key === 'Escape' && !modal.hidden) {
+                fecharModal();
+            }
+        });
+    })();
+</script>
+
+{% endblock %}

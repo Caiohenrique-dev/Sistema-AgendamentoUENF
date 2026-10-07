@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Visualizar Requerimento{% endblock %}
+{% block content %}
+<h2>Requerimento ID {{ pedido.id }}</h2>
+<h3>Aluno: {{ pedido.nome_aluno }} | E-mail: {{ pedido.email_aluno }} | Matrícula: {{ pedido.matricula }}</h3>
+<p><strong>Título do Projeto:</strong> {{ pedido.titulo_projeto }}</p>
+<p><strong>Equipamento:</strong> {{ pedido.equipamento }}</p>
+<p><strong>Data Agendada:</strong> {{ pedido.data_agendada }} {{ pedido.hora_inicio }} - {{ pedido.hora_fim }}</p>
+<p><strong>Status:</strong> {{ pedido.status }}</p>
+<hr>
+<h4>Detalhes do Requerimento</h4>
+<p><strong>Instituição:</strong> {{ pedido.instituicao_responsavel }} | <strong>Telefone:</strong> {{ pedido.telefone_instituicao }}</p>
+<p><strong>Tipo Projeto:</strong> {{ pedido.tipo_projeto }}</p>
+<p><strong>Nome Oficina:</strong> {{ pedido.nome_oficina }}</p>
+<p><strong>Agência de Fomento:</strong> {{ pedido.agencia_fomento }}</p>
+<p><strong>Ensaios:</strong> {{ pedido.ensaios_executar }} | <strong>Número de Amostras:</strong> {{ pedido.numero_amostras }}</p>
+<p><strong>Período:</strong> {{ pedido.periodo }}</p>
+<p><strong>Observações:</strong> {{ pedido.observacoes_requerimento }}</p>
+<p><strong>Técnicos:</strong> {{ pedido.tecnicos }}</p>
+<p><strong>Observações Gerais:</strong> {{ pedido.observacoes_gerais }}</p>
+<p><strong>Assinatura Aluno:</strong> {{ pedido.assinatura_aluno }} | Data: {{ pedido.data_assinatura_aluno }}</p>
+<p><strong>Assinatura Supervisor:</strong> {{ pedido.assinatura_supervisor }} | Data: {{ pedido.data_assinatura_supervisor }}</p>
+{% endblock %}

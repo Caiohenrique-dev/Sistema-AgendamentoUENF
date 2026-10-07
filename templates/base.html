@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema LECIV{% endblock %}</title>
+    
+    <!-- fonte inter do Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+
+    <header class="navbar">
+        <div class="navbar-container">
+            
+            <a href="#" class="logo-link">
+                
+                <img src="{{ url_for('static', filename='sua_logo.png') }}" alt="Logo LECIV" class="logo-img" onerror="this.style.display='none'">
+                <h1 class="logo">LECIV<span>UENF</span></h1>
+            </a>
+            
+            <!-- botão hamburguer pra aparecer no celular -->
+            <button id="btn-mobile" class="btn-mobile" aria-label="Abrir Menu">
+                <span class="hamburger"></span>
+            </button>
+            
+            <!-- navegação -->
+            <nav id="menu-nav" class="menu-nav">
+                
+            
+
+                {% if session.get('usuario_id') %}
+
+                    {% if session['perfil'] == 'admin' %}
+                        <a href="{{ url_for('admin_usuarios') }}" class="nav-link">Usuários</a>
+                        <a href="{{ url_for('listar_ferramentas') }}" class="nav-link">Ferramentas</a>
+                        <a href="{{ url_for('admin') }}" class="nav-link">Dashboard Admin</a>
+                    {% endif %}
+
+                    {% if session['perfil'] == 'encarregado' %}
+                        <a href="{{ url_for('painel_encarregado') }}" class="nav-link">Meu Painel</a>
+                        <a href="{{ url_for('emprestimos_ativos') }}" class="nav-link">Meus Empréstimos</a>
+                    {% endif %}
+
+                    {% if session['perfil'] != 'admin' %}
+                        <a href="{{ url_for('dashboard') }}" class="nav-link">Meus Pedidos</a>
+                    {% endif %}
+                    
+        
+                    
+                    <div class="divider"></div>
+                    <a href="{{ url_for('logout') }}" class="btn-outline-danger">Sair</a>
+
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+        
+        <!-- msg do sistema (Flash Messages) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                {% for category, msg in messages %}
+                    <div class="alert alert-{{ category if category and category != 'message' else 'info' }}">
+                        {{ msg }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+          
+        <!-- Área onde o conteúdo das outras páginas vai aparecer -->
+        <div class="content-card">
+            {% block content %}{% endblock %}
+        </div>
+        
+    </main>
+
+
+   <footer class="site-footer" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        
+        <div class="footer-links">
+            <a href="{{ url_for('tutorial') }}" style="color: var(--text-muted); font-weight: 500; text-decoration: none; font-size: 0.95rem; transition: 0.2s;">
+                Tutorial do Sistema
+            </a>
+        </div>
+
+        <div class="footer-copyright" style="text-align: center; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+            <p style="margin: 0;">&copy; 2026 Sistema LECIV. Todos os direitos reservados.</p>
+            <p style="margin: 0;">
+                Desenvolvido por 
+                <a href="https://www.instagram.com/fluxosystems/#" target="_blank" rel="noopener noreferrer" style="color: var(--brand); font-weight: 600; text-decoration: none;">
+                    Fluxo Systems
+                </a>
+            </p>
+        </div>
+
+    </footer>
+
+    <!-- ============================================== -->
+    <!-- modais e scripts fixos                       -->
+    <!-- ============================================== -->
+
+    <!-- modal de confirmação customizado -->
+    <div id="modal-confirmacao" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+            <h3 class="modal-title">Confirmar Exclusão</h3>
+            <p class="modal-text">Tem certeza que deseja excluir este item permanentemente? Esta ação não poderá ser desfeita.</p>
+            <div class="modal-actions">
+                <button type="button" id="btn-cancelar-modal" class="btn-cancelar">Cancelar</button>
+                <button type="button" id="btn-confirmar-modal" class="btn-danger-solid">Sim, excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- script do menu hamburguer -->
+    <script>
+        const btnMobile = document.getElementById('btn-mobile');
+        const menuNav = document.getElementById('menu-nav');
+
+        if(btnMobile && menuNav) {
+            btnMobile.addEventListener('click', function() {
+                menuNav.classList.toggle('active');
+                btnMobile.classList.toggle('active');
+            });
+        }
+    </script>
+
+    <!-- script Automático para interceptar todas as caixas de exclusão nativas do sistema -->
+    <script>
+        document.addEventListener('click', function(event) {
+            let target = event.target.closest('[onclick*="confirm"]');
+            
+            if (target) {
+                event.preventDefault();  
+                event.stopPropagation(); 
+                
+                const modal = document.getElementById('modal-confirmacao');
+                const btnConfirmar = document.getElementById('btn-confirmar-modal');
+                const btnCancelar = document.getElementById('btn-cancelar-modal');
+                
+                modal.classList.remove('hidden');
+                
+                const aoConfirmar = function() {
+                    fecharModal();
+                    if (target.tagName.toUpperCase() === 'A') {
+                        window.location.href = target.href;
+                    } else if (target.closest('form')) {
+                        target.closest('form').submit();
+                    }
+                };
+                
+                const fecharModal = function() {
+                    modal.classList.add('hidden');
+                    btnConfirmar.removeEventListener('click', aoConfirmar);
+                    btnCancelar.removeEventListener('click', fecharModal);
+                };
+
+                btnConfirmar.addEventListener('click', aoConfirmar);
+                btnCancelar.addEventListener('click', fecharModal);
+            }
+        }, true);
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% block title %}Usuários{% endblock %}
+
+{% block content %}
+
+<h2>Usuários Cadastrados</h2>
+
+<style>
+    .usuarios-responsivo,
+    .usuarios-responsivo * {
+        box-sizing: border-box;
+    }
+
+    .usuarios-pesquisa {
+        width: min(100%, 520px);
+        margin-bottom: 20px;
+    }
+
+    .usuarios-pesquisa label {
+        display: block;
+        margin-bottom: 7px;
+        color: #344b59;
+        font-size: 0.88rem;
+        font-weight: 750;
+    }
+
+    .usuarios-pesquisa input {
+        width: 100%;
+        min-height: 46px;
+        padding: 10px 14px;
+        border: 1px solid #cfd9e2;
+        border-radius: 9px;
+        background: #fff;
+        color: #243342;
+        font-family: inherit;
+        font-size: 0.95rem;
+        outline: none;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .usuarios-pesquisa input:focus {
+        border-color: #0f4c5c;
+        box-shadow: 0 0 0 3px rgba(15, 76, 92, 0.12);
+    }
+
+    .usuarios-pesquisa-vazia {
+        margin-top: 16px;
+        padding: 15px;
+        border: 1px solid #dfe7ee;
+        border-radius: 9px;
+        background: #f7f9fb;
+        color: #60717f;
+        text-align: center;
+    }
+
+    .usuarios-responsivo .tabela-admin tr[hidden] {
+        display: none !important;
+    }
+
+    @media (max-width: 768px) {
+        .usuarios-responsivo .tabela-admin,
+        .usuarios-responsivo .tabela-admin tbody,
+        .usuarios-responsivo .tabela-admin tr,
+        .usuarios-responsivo .tabela-admin td {
+            display: block;
+            width: 100%;
+        }
+
+        .usuarios-responsivo .tabela-admin {
+            border: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .usuarios-responsivo .tabela-admin thead {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .usuarios-responsivo .tabela-admin tbody {
+            display: grid;
+            gap: 16px;
+        }
+
+        .usuarios-responsivo .tabela-admin tr {
+            overflow: hidden;
+            border: 1px solid #dfe7ee;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(27, 55, 75, 0.09);
+        }
+
+        .usuarios-responsivo .tabela-admin td {
+            display: grid;
+            grid-template-columns: minmax(95px, 32%) minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            padding: 13px 14px;
+            border: 0;
+            border-bottom: 1px solid #edf1f4;
+            text-align: left;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .usuarios-responsivo .tabela-admin td::before {
+            content: attr(data-label);
+            color: #6a7886;
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            line-height: 1.5;
+            text-transform: uppercase;
+        }
+
+        .usuarios-responsivo .tabela-admin td:last-child {
+            display: block;
+            padding: 14px;
+            border-bottom: 0;
+            background: #f8fafc;
+        }
+
+        .usuarios-responsivo .tabela-admin td:last-child::before {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .usuarios-responsivo .btn-recusar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 44px;
+            margin: 0;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 390px) {
+        .usuarios-responsivo .tabela-admin td {
+            grid-template-columns: 82px minmax(0, 1fr);
+            padding-inline: 12px;
+        }
+    }
+</style>
+
+{% if usuarios %}
+    <div class="usuarios-pesquisa">
+        <label for="pesquisar-usuarios">Pesquisar usuários</label>
+        <input type="search"
+               id="pesquisar-usuarios"
+               placeholder="Pesquise por ID, nome, usuário ou perfil"
+               autocomplete="off">
+    </div>
+
+    <div class="usuarios-responsivo">
+        <table class="tabela-admin">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Usuário</th>
+                    <th>Perfil</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in usuarios %}
+                <tr>
+                    <td data-label="ID">{{ u[0] }}</td>
+                    <td data-label="Nome">{{ u[1] }}</td>
+                    <td data-label="Usuário">{{ u[2] }}</td>
+                    <td data-label="Perfil">{{ u[3] }}</td>
+                    <td data-label="Ação">
+                        <a href="{{ url_for('excluir_usuario', id=u[0]) }}"
+                           class="btn-recusar"
+                           onclick="return confirm('Tem certeza que deseja excluir este usuário permanentemente?');">
+                            Excluir
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div id="usuarios-pesquisa-vazia"
+         class="usuarios-pesquisa-vazia"
+         role="status"
+         hidden>
+        Nenhum usuário encontrado para esta pesquisa.
+    </div>
+
+    <script>
+        (function () {
+            const campoPesquisa = document.getElementById('pesquisar-usuarios');
+            const linhas = document.querySelectorAll('.usuarios-responsivo tbody tr');
+            const mensagemVazia = document.getElementById('usuarios-pesquisa-vazia');
+
+            function normalizar(texto) {
+                return texto
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .toLocaleLowerCase('pt-BR')
+                    .trim();
+            }
+
+            campoPesquisa.addEventListener('input', function () {
+                const pesquisa = normalizar(campoPesquisa.value);
+                let quantidadeVisivel = 0;
+
+                linhas.forEach(function (linha) {
+                    const corresponde = normalizar(linha.textContent).includes(pesquisa);
+                    linha.hidden = !corresponde;
+
+                    if (corresponde) {
+                        quantidadeVisivel += 1;
+                    }
+                });
+
+                mensagemVazia.hidden = quantidadeVisivel !== 0;
+            });
+        })();
+    </script>
+{% else %}
+    <div class="alert">
+        <p>Nenhum usuário encontrado no sistema.</p>
+    </div>
+{% endif %}
+
+{% endblock %}

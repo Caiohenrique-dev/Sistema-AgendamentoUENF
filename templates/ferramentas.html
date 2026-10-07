@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% block title %}Ferramentas{% endblock %}
+
+{% block content %}
+
+    <h2>Gestão de Ferramentas</h2>
+
+    <style>
+        .form-ferramenta,
+        .form-ferramenta *,
+        .ferramentas-responsivo,
+        .ferramentas-responsivo * {
+            box-sizing: border-box;
+        }
+
+        .ferramentas-pesquisa {
+            margin-bottom: 1.5rem;
+        }
+
+        .ferramentas-pesquisa input {
+            width: 100%;
+            max-width: 400px;
+            min-height: 46px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color, #ccc);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .ferramentas-pesquisa input:focus {
+            border-color: var(--brand, #0f4c5c);
+            box-shadow: 0 0 0 3px rgba(15, 76, 92, 0.12);
+        }
+
+        @media (max-width: 768px) {
+            .form-ferramenta,
+            .form-ferramenta fieldset,
+            .form-ferramenta input,
+            .form-ferramenta select,
+            .ferramentas-pesquisa,
+            .ferramentas-pesquisa input {
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+            }
+
+            .form-ferramenta fieldset {
+                padding: 16px;
+            }
+
+            .form-ferramenta input,
+            .form-ferramenta select {
+                display: block;
+            }
+
+            .ferramentas-responsivo .tabela-admin,
+            .ferramentas-responsivo .tabela-admin tbody,
+            .ferramentas-responsivo .tabela-admin tr,
+            .ferramentas-responsivo .tabela-admin td {
+                display: block;
+                width: 100%;
+            }
+
+            .ferramentas-responsivo .tabela-admin {
+                border: 0;
+                background: transparent;
+                box-shadow: none;
+            }
+
+            .ferramentas-responsivo .tabela-admin thead {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+
+            .ferramentas-responsivo .tabela-admin tbody {
+                display: grid;
+                gap: 16px;
+            }
+
+            .ferramentas-responsivo .tabela-admin tr {
+                overflow: hidden;
+                border: 1px solid #dfe7ee;
+                border-radius: 14px;
+                background: #fff;
+                box-shadow: 0 8px 24px rgba(27, 55, 75, 0.09);
+            }
+
+            .ferramentas-responsivo .tabela-admin td {
+                display: grid;
+                grid-template-columns: minmax(110px, 36%) minmax(0, 1fr);
+                gap: 12px;
+                align-items: start;
+                padding: 13px 14px;
+                border: 0;
+                border-bottom: 1px solid #edf1f4;
+                text-align: left;
+                white-space: normal;
+                overflow-wrap: anywhere;
+            }
+
+            .ferramentas-responsivo .tabela-admin td::before {
+                content: attr(data-label);
+                color: #6a7886;
+                font-size: 0.74rem;
+                font-weight: 800;
+                letter-spacing: 0.04em;
+                line-height: 1.5;
+                text-transform: uppercase;
+            }
+
+            .ferramentas-responsivo .tabela-admin td:last-child {
+                display: block;
+                padding: 14px;
+                border-bottom: 0;
+                background: #f8fafc;
+            }
+
+            .ferramentas-responsivo .tabela-admin td:last-child::before {
+                display: block;
+                margin-bottom: 10px;
+            }
+
+            .ferramentas-responsivo .btn-recusar {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                min-height: 44px;
+                margin: 0;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 390px) {
+            .form-ferramenta fieldset {
+                padding: 14px;
+            }
+
+            .ferramentas-responsivo .tabela-admin td {
+                grid-template-columns: 96px minmax(0, 1fr);
+                padding-inline: 12px;
+            }
+        }
+    </style>
+
+    <form method="POST"
+          action="{{ url_for('adicionar_ferramenta') }}"
+          class="form-ferramenta">
+        <fieldset>
+            <legend>Cadastrar Nova Ferramenta</legend>
+
+            <label>Número (Patrimônio):</label>
+            <input type="text" name="numero" placeholder="Ex: 00123-B" required pattern="\S+.*" title="Este campo não pode ficar vazio">
+
+            <label>Subunidade:</label>
+            <input type="text" name="subunidade" placeholder="Ex: Marcenaria, Serralheria..." required pattern="\S+.*" title="Este campo não pode ficar vazio">
+
+            <label>Nome do Equipamento:</label>
+            <input type="text" name="equipamento" placeholder="Ex: Furadeira de Bancada" required pattern="\S+.*" title="Este campo não pode ficar vazio">
+
+            <label>Encarregado Responsável:</label>
+            <select name="encarregado" required>
+                <option value="">Selecione quem será o responsável...</option>
+                {% for enc in encarregados %}
+                    <option value="{{ enc.nome }}">{{ enc.nome }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">
+                + Adicionar Ferramenta
+            </button>
+        </fieldset>
+    </form>
+
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid var(--border-color, #ddd);">
+
+    <h3>Lista de Ferramentas</h3>
+
+    <div class="ferramentas-pesquisa">
+        <input type="search"
+               id="pesquisaFerramenta"
+               placeholder="Pesquisar ferramenta, patrimônio ou subunidade"
+               oninput="filtrarTabela()"
+               autocomplete="off">
+    </div>
+
+    {% if ferramentas %}
+        <div class="ferramentas-responsivo">
+            <table class="tabela-admin" id="tabelaFerramentas">
+                <thead>
+                    <tr>
+                        <th>Patrimônio</th>
+                        <th>Subunidade</th>
+                        <th>Encarregado</th>
+                        <th>Equipamento</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in ferramentas %}
+                    <tr>
+                        <td data-label="Patrimônio">{{ f.numero }}</td>
+                        <td data-label="Subunidade">{{ f.subunidade }}</td>
+                        <td data-label="Encarregado">{{ f.encarregado }}</td>
+                        <td data-label="Equipamento"><strong>{{ f.equipamento }}</strong></td>
+                        <td data-label="Ações">
+                            <a href="{{ url_for('excluir_ferramenta', id=f.id) }}"
+                               class="btn-recusar"
+                               onclick="return confirm('Tem certeza que deseja excluir a ferramenta {{ f.equipamento }}?');">
+                               Excluir
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert">
+            <p>Nenhuma ferramenta cadastrada no sistema ainda.</p>
+        </div>
+    {% endif %}
+
+    <script>
+        function normalizarPesquisa(texto) {
+            return texto
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLocaleLowerCase('pt-BR');
+        }
+
+        function filtrarTabela() {
+            const campo = document.getElementById('pesquisaFerramenta');
+            const tabela = document.getElementById('tabelaFerramentas');
+
+            if (!campo || !tabela) {
+                return;
+            }
+
+            const pesquisa = normalizarPesquisa(campo.value);
+            const linhas = tabela.querySelectorAll('tbody tr');
+
+            linhas.forEach(function (linha) {
+                const textoLinha = normalizarPesquisa(linha.textContent);
+                linha.style.display = textoLinha.includes(pesquisa) ? '' : 'none';
+            });
+        }
+    </script>
+
+{% endblock %}

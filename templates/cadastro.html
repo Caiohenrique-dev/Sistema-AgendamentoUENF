@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Cadastro{% endblock %}
+
+{% block content %}
+
+    <h2>Criar Nova Conta</h2>
+
+    <form method="POST">
+        <label>Nome Completo:</label>
+        <input type="text" name="nome" placeholder="Ex: João da Silva" required>
+        
+        <label>E-mail:</label>
+        <input type="email" name="email" placeholder="seuemail@exemplo.com" required>
+        
+        <label>Usuário (Login):</label>
+        <input type="text" name="usuario" placeholder="Escolha um nome de usuário" required>
+        
+        <label>Senha:</label>
+        <input type="password" name="senha" placeholder="Crie uma senha segura" required>
+        
+        <button type="submit" class="btn-enviar">Cadastrar</button>
+    </form>
+
+    <p style="text-align: center; margin-top: 20px;">
+        Já tem conta? <a href="{{ url_for('login') }}">Fazer Login</a>
+    </p>
+
+{% endblock %}

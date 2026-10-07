@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+
+<!-- TELA DE ABERTURA COM VÍDEO -->
+<div id="splash-screen">
+    <!-- autoplay: roda sozinho | muted: obrigatório pro navegador deixar | playsinline: pra celular -->
+    <video id="intro-video" autoplay muted playsinline>
+    <source
+        src="{{ url_for('static', filename='intro-mobile.mp4') }}"
+        media="(max-width: 900px)"
+        type="video/mp4"
+    >
+
+    <source
+        src="{{ url_for('static', filename='intro-desktop.mp4') }}"
+        type="video/mp4"
+    >
+</video>
+</div>
+
+<!-- SCRIPT PARA ESCONDER O VÍDEO QUANDO ACABAR -->
+<!-- SCRIPT PARA ESCONDER O VÍDEO (COM TRAVA DE SEGURANÇA) -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const video = document.getElementById('intro-video');
+        const splash = document.getElementById('splash-screen');
+
+        // Função que faz a tela de abertura sumir
+        function removerSplash() {
+            if (splash) {
+                splash.classList.add('esconder-splash');
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                }, 600);
+            }
+        }
+
+        if (video) {
+            // Cenário 1: O vídeo tocou até o final com sucesso
+            video.addEventListener('ended', removerSplash);
+            
+            // Cenário 2: Deu erro ao carregar o vídeo (como o erro 404 de agora)
+            video.addEventListener('error', removerSplash);
+            
+            // Cenário 3: Trava de segurança (se passar 5 segundos, some de qualquer jeito)
+            setTimeout(removerSplash, 5000);
+        } else {
+            // Se a tag do vídeo sumir do HTML por algum motivo
+            removerSplash();
+        }
+    });
+</script>
+
+<div class="login-content">
+    
+    <div class="login-header">
+        <img src="{{ url_for('static', filename='sua_logo.png') }}" alt="Logo LECIV" class="login-logo" onerror="this.style.display='none'">
+        
+        <h2 class="login-title">Acesso ao Sistema</h2>
+        <p class="login-subtitle">Insira suas credenciais para acessar o painel.</p>
+    </div>
+
+    <form method="POST">
+        
+      <div class="input-group">
+    <label for="usuario">Usuário ou E-mail:</label>
+    <input type="text" id="usuario" name="usuario" placeholder="Digite seu usuário ou e-mail" required autofocus>
+   </div>
+        <div class="input-group">
+            <label for="senha">Senha:</label>
+            <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
+        </div>
+
+        <!-- Botão Entrar liso, sem o ícone do cadeado -->
+        <button type="submit" class="btn-primary btn-enviar login-btn">
+            Entrar
+        </button>
+
+    </form>
+
+    <div class="login-footer">
+        <p>Não tem conta? <br> <a href="{{ url_for('cadastro') }}" class="link-destaque">Criar nova conta</a></p>
+    </div>
+
+</div>
+
+{% endblock %}

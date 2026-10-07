@@ -1,0 +1,693 @@
+{% extends "base.html" %}
+{% block title %}Pedidos da Subunidade{% endblock %}
+
+{% block content %}
+
+<style>
+    .subunidade-painel,
+    .subunidade-painel *,
+    .confirmacao-modal,
+    .confirmacao-modal * {
+        box-sizing: border-box;
+    }
+
+    .subunidade-painel {
+        --azul: #0f4c5c;
+        --azul-hover: #0a3945;
+        --verde: #16a377;
+        --verde-hover: #10805e;
+        --vermelho: #ef4444;
+        --vermelho-hover: #cf3030;
+        --laranja: #d97706;
+        --texto: #243342;
+        --texto-suave: #687786;
+        --borda: #dfe7ee;
+        width: 100%;
+        color: var(--texto);
+    }
+
+    .subunidade-cabecalho {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 24px;
+    }
+
+    .subunidade-titulo h2 {
+        margin: 0 0 6px;
+        color: var(--azul);
+        font-size: clamp(1.7rem, 3vw, 2.15rem);
+        line-height: 1.2;
+    }
+
+    .subunidade-titulo p {
+        margin: 0;
+        color: var(--texto-suave);
+        font-size: 0.98rem;
+    }
+
+    .pedidos-contador {
+        flex: 0 0 auto;
+        padding: 9px 14px;
+        border: 1px solid #c8dfe5;
+        border-radius: 999px;
+        background: #eaf4f6;
+        color: var(--azul);
+        font-size: 0.88rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .alerta-encarregado {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        margin-bottom: 25px;
+        padding: 16px 18px;
+        border: 1px solid #f1d3a7;
+        border-left: 5px solid var(--laranja);
+        border-radius: 12px;
+        background: #fff8ea;
+        color: #5d4a2f;
+        line-height: 1.55;
+        text-align: left;
+        box-shadow: 0 5px 16px rgba(115, 78, 20, 0.06);
+    }
+
+    .alerta-encarregado__icone {
+        flex: 0 0 auto;
+        font-size: 1.1rem;
+        line-height: 1.45;
+    }
+
+    .pedidos-tabela-container {
+        overflow: hidden;
+        border: 1px solid var(--borda);
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 10px 30px rgba(27, 55, 75, 0.09);
+    }
+
+    .subunidade-painel .tabela-admin {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+        table-layout: auto;
+    }
+
+    .subunidade-painel .tabela-admin th,
+    .subunidade-painel .tabela-admin td {
+        padding: 16px 14px;
+        border: 0;
+        border-bottom: 1px solid var(--borda);
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .subunidade-painel .tabela-admin th {
+        background: #eef2f7;
+        color: #667584;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.055em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .subunidade-painel .tabela-admin tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .subunidade-painel .tabela-admin tbody tr:hover {
+        background: #f8fbfc;
+    }
+
+    .subunidade-painel .tabela-admin tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .pedido-id {
+        color: var(--azul);
+        font-weight: 800;
+    }
+
+    .pedido-aluno,
+    .pedido-equipamento,
+    .pedido-data {
+        overflow-wrap: anywhere;
+        word-break: normal;
+    }
+
+    .pedido-equipamento {
+        color: #172433;
+    }
+
+    .pedido-acoes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        min-width: 275px;
+    }
+
+    .subunidade-painel .pedido-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 9px 13px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        color: #fff;
+        font-family: inherit;
+        font-size: 0.86rem;
+        font-weight: 750;
+        line-height: 1;
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    }
+
+    .subunidade-painel .pedido-btn:hover {
+        color: #fff;
+        text-decoration: none;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(20, 42, 58, 0.18);
+    }
+
+    .subunidade-painel .pedido-btn--visualizar {
+        background: var(--azul);
+    }
+
+    .subunidade-painel .pedido-btn--visualizar:hover {
+        background: var(--azul-hover);
+    }
+
+    .subunidade-painel .pedido-btn--aprovar {
+        background: var(--verde);
+    }
+
+    .subunidade-painel .pedido-btn--aprovar:hover {
+        background: var(--verde-hover);
+    }
+
+    .subunidade-painel .pedido-btn--recusar {
+        background: var(--vermelho);
+    }
+
+    .subunidade-painel .pedido-btn--recusar:hover {
+        background: var(--vermelho-hover);
+    }
+
+    .pedidos-vazio {
+        padding: 34px 20px;
+        border: 1px solid #bbddd4;
+        border-radius: 14px;
+        background: #edf9f5;
+        color: #17644f;
+        text-align: center;
+    }
+
+    .pedidos-vazio__icone {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 2rem;
+    }
+
+    .pedidos-vazio h3 {
+        margin: 0 0 6px;
+        color: #11604b;
+    }
+
+    .pedidos-vazio p {
+        margin: 0;
+    }
+
+    body.modal-pedido-aberto {
+        overflow: hidden;
+    }
+
+    .confirmacao-modal[hidden] {
+        display: none;
+    }
+
+    .confirmacao-modal {
+        --azul: #0f4c5c;
+        --verde: #16a377;
+        --vermelho: #ef4444;
+        position: fixed;
+        z-index: 10000;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(22, 35, 50, 0.62);
+        backdrop-filter: blur(3px);
+    }
+
+    .confirmacao-modal__caixa {
+        width: min(100%, 500px);
+        padding: 34px 38px 36px;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 22px 65px rgba(15, 31, 45, 0.28);
+        text-align: center;
+        animation: abrirConfirmacao 0.2s ease-out;
+    }
+
+    @keyframes abrirConfirmacao {
+        from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .confirmacao-modal__icone {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 66px;
+        height: 66px;
+        margin-bottom: 22px;
+        border-radius: 50%;
+        font-size: 1.9rem;
+        font-weight: 900;
+    }
+
+    .confirmacao-modal__icone--aprovar {
+        background: #e9f8f2;
+        color: var(--verde);
+    }
+
+    .confirmacao-modal__icone--recusar {
+        background: #fff0f1;
+        color: var(--vermelho);
+    }
+
+    .confirmacao-modal__titulo {
+        margin: 0 0 12px;
+        color: #172433;
+        font-size: 1.5rem;
+        line-height: 1.25;
+    }
+
+    .confirmacao-modal__texto {
+        margin: 0 auto 28px;
+        color: #687786;
+        font-size: 1rem;
+        line-height: 1.55;
+    }
+
+    .confirmacao-modal__acoes {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .confirmacao-modal__btn {
+        min-height: 52px;
+        padding: 12px 16px;
+        border: 0;
+        border-radius: 9px;
+        color: #fff;
+        font-family: inherit;
+        font-size: 0.98rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: transform 0.18s ease, filter 0.18s ease;
+    }
+
+    .confirmacao-modal__btn:hover {
+        filter: brightness(0.92);
+        transform: translateY(-1px);
+    }
+
+    .confirmacao-modal__btn--cancelar {
+        background: var(--azul);
+    }
+
+    .confirmacao-modal__btn--aprovar {
+        background: var(--verde);
+    }
+
+    .confirmacao-modal__btn--recusar {
+        background: var(--vermelho);
+    }
+
+    @media (max-width: 900px) {
+        .subunidade-painel .tabela-admin th,
+        .subunidade-painel .tabela-admin td {
+            padding-inline: 10px;
+        }
+
+        .pedido-acoes {
+            min-width: 245px;
+        }
+
+        .subunidade-painel .pedido-btn {
+            padding-inline: 10px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .subunidade-cabecalho {
+            align-items: flex-start;
+            flex-direction: column;
+            margin-bottom: 18px;
+        }
+
+        .pedidos-contador {
+            align-self: flex-start;
+        }
+
+        .alerta-encarregado {
+            padding: 14px;
+        }
+
+        .pedidos-tabela-container {
+            overflow: visible;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .subunidade-painel .tabela-admin,
+        .subunidade-painel .tabela-admin tbody,
+        .subunidade-painel .tabela-admin tr,
+        .subunidade-painel .tabela-admin td {
+            display: block;
+            width: 100%;
+        }
+
+        .subunidade-painel .tabela-admin thead {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .subunidade-painel .tabela-admin tbody {
+            display: grid;
+            gap: 16px;
+        }
+
+        .subunidade-painel .tabela-admin tr {
+            overflow: hidden;
+            border: 1px solid var(--borda);
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(27, 55, 75, 0.09);
+        }
+
+        .subunidade-painel .tabela-admin tbody tr:hover {
+            background: #fff;
+        }
+
+        .subunidade-painel .tabela-admin td {
+            display: grid;
+            grid-template-columns: minmax(105px, 36%) minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            padding: 13px 14px;
+            border-bottom: 1px solid #edf1f4;
+            white-space: normal;
+        }
+
+        .subunidade-painel .tabela-admin td::before {
+            content: attr(data-label);
+            color: #6a7886;
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.045em;
+            line-height: 1.5;
+            text-transform: uppercase;
+        }
+
+        .subunidade-painel .tabela-admin td:last-child {
+            display: block;
+            padding: 14px;
+            border-bottom: 0;
+            background: #f8fafc;
+        }
+
+        .subunidade-painel .tabela-admin td:last-child::before {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .pedido-acoes {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            min-width: 0;
+            width: 100%;
+        }
+
+        .subunidade-painel .pedido-btn {
+            width: 100%;
+            min-width: 0;
+            padding-inline: 7px;
+            font-size: 0.82rem;
+        }
+
+        .confirmacao-modal__caixa {
+            padding: 28px 22px 24px;
+        }
+    }
+
+    @media (max-width: 430px) {
+        .subunidade-painel .tabela-admin td {
+            grid-template-columns: 90px minmax(0, 1fr);
+            padding-inline: 12px;
+        }
+
+        .pedido-acoes,
+        .confirmacao-modal__acoes {
+            grid-template-columns: 1fr;
+        }
+
+        .subunidade-painel .pedido-btn {
+            min-height: 44px;
+            font-size: 0.9rem;
+        }
+
+        .confirmacao-modal__btn--cancelar {
+            order: 2;
+        }
+    }
+</style>
+
+<section class="subunidade-painel">
+    <header class="subunidade-cabecalho">
+        <div class="subunidade-titulo">
+            <h2>Pedidos Pendentes da Sua Subunidade</h2>
+            <p>Visualize os dados e registre sua decisão.</p>
+        </div>
+
+        {% if pedidos %}
+            <span class="pedidos-contador">
+                {{ pedidos|length }} {{ 'pedido pendente' if pedidos|length == 1 else 'pedidos pendentes' }}
+            </span>
+        {% endif %}
+    </header>
+
+    <div class="alerta-encarregado" role="alert">
+        <span class="alerta-encarregado__icone" aria-hidden="true">⚠️</span>
+        <div>
+            <strong>Atenção Encarregado:</strong> Por favor, analise os pedidos abaixo. Eles devem ser
+            <strong>Aceitos</strong> ou <strong>Recusados</strong> no prazo máximo de <strong>1 dia útil</strong>.
+        </div>
+    </div>
+
+    {% if pedidos %}
+        <div class="pedidos-tabela-container">
+            <table class="tabela-admin">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Aluno</th>
+                        <th>Equipamento</th>
+                        <th>Data da solicitação</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pedidos %}
+                    <tr>
+                        <td data-label="ID">
+                            <span class="pedido-id">#{{ p.id }}</span>
+                        </td>
+
+                        <td data-label="Aluno">
+                            <span class="pedido-aluno">{{ p.nome_aluno }}</span>
+                        </td>
+
+                        <td data-label="Equipamento">
+                            <strong class="pedido-equipamento">{{ p.equipamento }}</strong>
+                        </td>
+
+                        <td data-label="Data da solicitação">
+                            <span class="pedido-data">{{ p.data_envio }}</span>
+                        </td>
+
+                        <td data-label="Ações">
+                            <div class="pedido-acoes">
+                                <a href="{{ url_for('visualizar_requerimento', id=p.id) }}"
+                                   class="pedido-btn pedido-btn--visualizar"
+                                   aria-label="Visualizar o pedido {{ p.id }}">
+                                    Visualizar
+                                </a>
+
+                                <button type="button"
+                                        class="pedido-btn pedido-btn--aprovar js-confirmar-pedido"
+                                        data-acao="aprovar"
+                                        data-url="{{ url_for('decidir_pedido_encarregado', id=p.id, acao='aprovar') }}"
+                                        data-pedido-id="{{ p.id }}">
+                                    Aprovar
+                                </button>
+
+                                <button type="button"
+                                        class="pedido-btn pedido-btn--recusar js-confirmar-pedido"
+                                        data-acao="recusar"
+                                        data-url="{{ url_for('decidir_pedido_encarregado', id=p.id, acao='reprovar') }}"
+                                        data-pedido-id="{{ p.id }}">
+                                    Recusar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="pedidos-vazio" role="status">
+            <span class="pedidos-vazio__icone" aria-hidden="true">✅</span>
+            <h3>Tudo em dia!</h3>
+            <p>Nenhum pedido pendente para sua subunidade no momento.</p>
+        </div>
+    {% endif %}
+</section>
+
+<div id="modal-confirmacao-pedido"
+     class="confirmacao-modal"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="confirmacao-pedido-titulo"
+     aria-describedby="confirmacao-pedido-texto"
+     hidden>
+    <div class="confirmacao-modal__caixa">
+        <span id="confirmacao-pedido-icone" class="confirmacao-modal__icone" aria-hidden="true"></span>
+
+        <h3 id="confirmacao-pedido-titulo" class="confirmacao-modal__titulo"></h3>
+        <p id="confirmacao-pedido-texto" class="confirmacao-modal__texto"></p>
+
+        <div class="confirmacao-modal__acoes">
+            <button type="button"
+                    id="cancelar-confirmacao-pedido"
+                    class="confirmacao-modal__btn confirmacao-modal__btn--cancelar">
+                Cancelar
+            </button>
+
+            <button type="button"
+                    id="executar-confirmacao-pedido"
+                    class="confirmacao-modal__btn">
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const modal = document.getElementById('modal-confirmacao-pedido');
+        const titulo = document.getElementById('confirmacao-pedido-titulo');
+        const texto = document.getElementById('confirmacao-pedido-texto');
+        const icone = document.getElementById('confirmacao-pedido-icone');
+        const botaoCancelar = document.getElementById('cancelar-confirmacao-pedido');
+        const botaoConfirmar = document.getElementById('executar-confirmacao-pedido');
+
+        let urlDaAcao = '';
+        let botaoQueAbriu = null;
+
+        function fecharModal() {
+            modal.hidden = true;
+            document.body.classList.remove('modal-pedido-aberto');
+
+            if (botaoQueAbriu) {
+                botaoQueAbriu.focus();
+            }
+        }
+
+        function abrirModal(botao) {
+            const acao = botao.dataset.acao;
+            const pedidoId = botao.dataset.pedidoId;
+
+            urlDaAcao = botao.dataset.url;
+            botaoQueAbriu = botao;
+
+            icone.className = 'confirmacao-modal__icone';
+            botaoConfirmar.className = 'confirmacao-modal__btn';
+
+            if (acao === 'aprovar') {
+                icone.textContent = '✓';
+                icone.classList.add('confirmacao-modal__icone--aprovar');
+                titulo.textContent = 'Confirmar aprovação';
+                texto.textContent = 'Tem certeza que deseja aprovar o pedido #' + pedidoId + '? O pedido seguirá para a próxima etapa.';
+                botaoConfirmar.textContent = 'Sim, aprovar';
+                botaoConfirmar.classList.add('confirmacao-modal__btn--aprovar');
+            } else {
+                icone.textContent = '×';
+                icone.classList.add('confirmacao-modal__icone--recusar');
+                titulo.textContent = 'Confirmar recusa';
+                texto.textContent = 'Tem certeza que deseja recusar o pedido #' + pedidoId + '? Esta decisão será registrada no sistema.';
+                botaoConfirmar.textContent = 'Sim, recusar';
+                botaoConfirmar.classList.add('confirmacao-modal__btn--recusar');
+            }
+
+            modal.hidden = false;
+            document.body.classList.add('modal-pedido-aberto');
+            botaoConfirmar.focus();
+        }
+
+        document.querySelectorAll('.js-confirmar-pedido').forEach(function (botao) {
+            botao.addEventListener('click', function (evento) {
+                evento.preventDefault();
+                evento.stopImmediatePropagation();
+                abrirModal(botao);
+            }, true);
+        });
+
+        botaoCancelar.addEventListener('click', fecharModal);
+
+        botaoConfirmar.addEventListener('click', function () {
+            if (urlDaAcao) {
+                window.location.assign(urlDaAcao);
+            }
+        });
+
+        modal.addEventListener('click', function (evento) {
+            if (evento.target === modal) {
+                fecharModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (evento) {
+            if (evento.key === 'Escape' && !modal.hidden) {
+                fecharModal();
+            }
+        });
+    })();
+</script>
+
+{% endblock %}

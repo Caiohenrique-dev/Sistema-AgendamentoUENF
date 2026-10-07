@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Meus Requerimentos{% endblock %}
+
+{% block content %}
+
+    <h2>Meus Requerimentos</h2>
+
+    <div style="margin-bottom: 25px;">
+        <a href="{{ url_for('requerimento') }}" class="btn-primary">
+            + Novo Requerimento
+        </a>
+    </div>
+
+    {% if pedidos %}
+        <table class="tabela-admin">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Data Envio</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in pedidos %}
+                <tr>
+                    <td>{{ p.id }}</td>
+                    <td>{{ p.data_envio }}</td>
+                    
+                    <td style="font-weight: bold;">
+                        {% if p.status == 'aprovado' %}
+                            <span style="color: var(--success);">✔ Aprovado</span>
+                        {% elif p.status == 'recusado' %}
+                            <span style="color: var(--danger);">✖ Recusado</span>
+                        {% else %}
+                            <span style="color: #d97706;">⏳ {{ p.status | capitalize }}</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td>
+                        <a href="{{ url_for('visualizar_requerimento', id=p.id) }}">
+                            Visualizar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert">
+            <p>Você ainda não enviou nenhum requerimento.</p>
+        </div>
+    {% endif %}
+
+{% endblock %}

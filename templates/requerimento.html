@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}Novo Requerimento{% endblock %}
+
+{% block content %}
+
+<style>
+    /* No PC, divide em 2 colunas */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 15px;
+    }
+    
+    /* Se tiver 3 itens na linha (ex: data/hora) */
+    .form-grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 15px;
+    }
+
+    /* No Celular, tudo vira 1 coluna só */
+    @media (max-width: 768px) {
+        .form-grid, .form-grid-3 {
+            grid-template-columns: 1fr; /* Uma coluna empilhada */
+            gap: 10px;
+        }
+    }
+</style>
+
+<h2>Novo Requerimento</h2>
+
+<div class="alert" style="text-align: left; border-left: 5px solid #d97706;">
+    <strong>🕒 Atenção:</strong> O requerimento e o pedido de agendamento devem ser feitos com no mínimo <strong>5 dias úteis de antecedência</strong>.
+</div>
+
+<form method="POST">
+
+    <fieldset>
+        <legend>1. Dados do Aluno</legend>
+        
+        <div class="form-grid">
+            <div>
+                <label>Nome Completo:</label>
+                <input type="text" name="nome_aluno" placeholder="Seu nome" required>
+            </div>
+            <div>
+                <label>E-mail:</label>
+                <input type="email" name="email_aluno" placeholder="seuemail@exemplo.com" required>
+            </div>
+        </div>
+
+        <div>
+            <label>Matrícula:</label>
+            <input type="text" name="matricula" placeholder="Número de matrícula" required>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>2. Instituição e Contato</legend>
+
+        <div class="form-grid">
+            <div>
+                <label>Instituição Responsável:</label>
+                <input type="text" name="instituicao_responsavel">
+            </div>
+            <div>
+                <label>Telefone Institucional:</label>
+                <input type="text" name="telefone_instituicao">
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div>
+                <label>Endereço:</label>
+                <input type="text" name="endereco">
+            </div>
+            <div>
+                <label>Bairro / CEP:</label>
+                <input type="text" name="bairro_cep">
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div>
+                <label>Cidade / Estado:</label>
+                <input type="text" name="cidade_estado">
+            </div>
+            <div>
+                <label>Telefone Pessoal:</label>
+                <input type="text" name="telefone_contato">
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>3. Dados do Projeto</legend>
+
+        <div class="form-grid">
+            <div>
+                <label>Tipo de Projeto:</label>
+                <input type="text" name="tipo_projeto">
+            </div>
+            <div>
+                <label>Nome da Oficina:</label>
+                <input type="text" name="nome_oficina">
+            </div>
+        </div>
+
+        <label>Título do Projeto:</label>
+        <input type="text" name="titulo_projeto" style="margin-bottom: 15px;">
+
+        <div class="form-grid">
+            <div>
+                <label>Ensaios a Executar:</label>
+                <input type="text" name="ensaios_executar">
+            </div>
+            <div>
+                <label>Número de Amostras:</label>
+                <input type="text" name="numero_amostras">
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div>
+                <label>Observações:</label>
+                <textarea name="observacoes_requerimento"></textarea>
+            </div>
+            <div>
+                <label>Técnicos Envolvidos:</label>
+                <textarea name="tecnicos"></textarea>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset style="border-color: var(--brand);">
+        <legend style="color: var(--brand-hover);">4. Agendamento de Ferramenta</legend>
+
+        <div class="form-grid">
+            <div>
+                <label>Tipo de Ensaio:</label>
+                <input type="text" name="tipo_ensaio">
+            </div>
+            
+            <div>
+                <label style="font-weight: bold; color: var(--brand);">Selecione o Equipamento:</label>
+                <select name="equipamento" id="select-equipamento" required onchange="atualizarResponsavel()">
+                    <option value="" data-encarregado="">-- Clique para selecionar --</option>
+                    {% for item in lista_ferramentas %}
+                        <option value="{{ item.nome }}" data-encarregado="{{ item.encarregado }}">
+                            {{ item.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div style="background-color: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #cbd5e1;">
+            <label style="font-weight: bold; color: #475569;">Encarregado Responsável (Automático):</label>
+            <input type="text" id="campo-encarregado" readonly 
+                   style="background-color: transparent; border: none; font-weight: bold; font-size: 1.1rem; color: var(--brand); padding: 5px 0;"
+                   placeholder="Selecione uma ferramenta acima...">
+        </div>
+
+        <div class="form-grid-3">
+            <div>
+                <label>Data:</label>
+                <input type="date" name="data_agendada" required>
+            </div>
+            <div>
+                <label>Início:</label>
+                <input type="time" name="hora_inicio" required>
+            </div>
+            <div>
+                <label>Fim:</label>
+                <input type="time" name="hora_fim" required>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>5. Assinaturas (Opicional nesta etapa)</legend>
+        <div class="form-grid">
+            <div>
+                <label>Assinatura do Aluno:</label>
+                <input type="text" name="assinatura_aluno">
+            </div>
+            <div>
+                <label>Data Assinatura:</label>
+                <input type="date" name="data_assinatura_aluno">
+            </div>
+        </div>
+    </fieldset>
+
+    <button type="submit" class="btn-enviar">
+        Enviar Requerimento e Agendar
+    </button>
+
+</form>
+
+<script>
+    function atualizarResponsavel() {
+        // Pega o elemento Select
+        var select = document.getElementById('select-equipamento');
+        
+        // Pega a opção que foi clicada
+        var optionSelecionada = select.options[select.selectedIndex];
+        
+        // Pega o atributo customizado 'data-encarregado'
+        var nomeEncarregado = optionSelecionada.getAttribute('data-encarregado');
+        
+        // Joga no input visual
+        var campoVisual = document.getElementById('campo-encarregado');
+        
+        if (nomeEncarregado) {
+            campoVisual.value = nomeEncarregado;
+        } else {
+            campoVisual.value = "";
+            campoVisual.placeholder = "Selecione uma ferramenta acima...";
+        }
+    }
+</script>
+
+{% endblock %}

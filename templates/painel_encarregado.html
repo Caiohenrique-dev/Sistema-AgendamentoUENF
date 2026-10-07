@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Painel do Encarregado{% endblock %}
+
+{% block content %}
+
+    <h2>Painel de Solicitações</h2>
+
+    {% if session.get('perfil') == 'admin' %}
+        <div class="alert" style="background-color: #e0f2f1; color: #00695c; border-color: #4db6ac; text-align: left;">
+            👀 <strong>Modo Espião:</strong> Você está visualizando os pedidos do encarregado: <strong>{{ session.get('encarregado_nome') }}</strong>.
+        </div>
+    {% endif %}
+
+    {% if pedidos %}
+        <table class="tabela-admin">
+            <thead>
+                <tr>
+                    <th>Aluno/Solicitante</th>
+                    <th>Equipamento</th>
+                    <th>Data Agendada</th>
+                    <th>Horário</th>
+                    <th>Status Atual</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in pedidos %}
+                <tr>
+                    <td>
+                        {% if p.nome_aluno_solicitante %}
+                            {{ p.nome_aluno_solicitante }}
+                        {% else %}
+                            <span style="color: #999; font-style: italic;">(Usuário Removido - ID: {{ p.usuario_id }})</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td><strong>{{ p.equipamento }}</strong></td>
+                    
+                    <td>{{ p.data_agendada }}</td>
+                    
+                    <td>{{ p.hora_inicio }} - {{ p.hora_fim }}</td>
+                    
+                    <td style="font-weight: bold;">
+                        {% if p.status == 'aprovado' %}
+                            <span style="color: var(--success);">✔ Aprovado (Aguardando Admin)</span>
+                        {% elif p.status == 'recusado' %}
+                            <span style="color: var(--danger);">✖ Recusado</span>
+                        {% elif p.status == 'pendente_encarregado' %}
+                            <span style="color: #d97706;">⏳ Pendente Análise</span>
+                        {% else %}
+                            {{ p.status | capitalize }}
+                        {% endif %}
+                    </td>
+                    
+                    <td>
+                        {% if p.status == 'pendente_encarregado' %} 
+                            <a href="{{ url_for('decidir_pedido_encarregado', id=p.id, acao='aprovar') }}" 
+                               class="btn-aprovar"
+                               onclick="return confirm('Deseja realmente APROVAR este agendamento?');">
+                               Aprovar
+                            </a>
+                            
+                            <a href="{{ url_for('decidir_pedido_encarregado', id=p.id, acao='reprovar') }}" 
+                               class="btn-recusar"
+                               onclick="return confirm('Deseja realmente RECUSAR este agendamento?');">
+                               Recusar
+                            </a>
+                        {% else %}
+                            <span style="color: #ccc;">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert">
+            <p>Não há solicitações pendentes de análise no momento.</p>
+        </div>
+    {% endif %}
+
+    <br>
+    
+    <div style="margin-top: 10px;">
+        <a href="{{ url_for('emprestimos_ativos') }}" class="btn-primary" style="text-decoration: none;">
+            Ver Empréstimos Ativos (Entregues)
+        </a>
+    </div>
+
+{% endblock %}
