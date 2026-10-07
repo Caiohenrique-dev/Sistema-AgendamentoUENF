@@ -1,0 +1,26 @@
+# Bancos de dados
+*.db
+*.sqlite
+*.sqlite3
+
+# Segredos
+.secret_key
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ambientes virtuais
+venv/
+.venv/
+env/
+
+# VS Code
+.vscode/
+
+# Sistema
+.DS_Store
+Thumbs.db
